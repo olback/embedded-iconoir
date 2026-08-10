@@ -254,7 +254,7 @@ pub fn main() {
     // panic!("{:#?}", get_categories());
 
     let svgs: Vec<_> = WalkDir::new(ICONS_DIR) // WalkDir for potential future folders
-        .max_depth(1)
+        .max_depth(2)
         .into_iter()
         .filter_map(|f| f.ok())
         .filter(|f| {
