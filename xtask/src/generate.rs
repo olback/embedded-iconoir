@@ -18,6 +18,21 @@ const EXTENSION: &str = "bits";
 
 const ICON_CODEGEN_TARGET_FILE: &str = "./embedded-iconoir/src/icons.gen.rs";
 
+#[derive(Debug, Clone, Copy)]
+enum IconSet {
+    Regular,
+    Solid,
+}
+
+impl core::fmt::Display for IconSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IconSet::Regular => write!(f, "regular"),
+            IconSet::Solid => write!(f, "solid"),
+        }
+    }
+}
+
 const fn alpha_cutoff(size: u32) -> u8 {
     match size {
         0..=16 => 0x40,
@@ -165,6 +180,7 @@ fn denumber(s: &str) -> String {
 fn gen_module(
     code: &mut String,
     size: u32,
+    icon_set: IconSet,
     icons: &HashMap<String, Vec<String>>,
 ) -> anyhow::Result<()> {
     println!(
@@ -174,7 +190,7 @@ fn gen_module(
     );
     /*
     sample:
-        make_icon_category!(actions, 24, "Actions", [
+        make_icon_category!(actions, 24, "regular", "Actions", [
             (AddCircle, "add-circle"),
             (Cancel, "cancel"),
             (Check, "check"),
@@ -182,21 +198,20 @@ fn gen_module(
         ]);
      */
 
-    writeln!(code, "#[cfg(feature = \"{}px\")]", size)?;
-    writeln!(code, "pub mod size{}px {{ \nuse super::*; \n", size)?;
+    writeln!(code, "#[cfg(feature = \"{size}px-{icon_set}\")]")?;
+    writeln!(
+        code,
+        "pub mod size{size}px_{icon_set} {{ \nuse super::*; \n"
+    )?;
     for (cat, icon_list) in icons {
         println!(
-            "{}px: making category {} for {} icons...",
-            size,
-            cat,
+            "{size}px-{icon_set}: making category {cat} for {} icons...",
             icon_list.len()
         );
         writeln!(
             code,
-            "make_icon_category!({}, {}, \"{}\", [",
+            "make_icon_category!({}, {size}, \"{icon_set}\", \"{cat}\", [",
             denumber(cat).to_snake_case(),
-            size,
-            cat
         )?;
         for icon_name in icon_list {
             writeln!(
@@ -208,13 +223,13 @@ fn gen_module(
         }
         writeln!(code, "]);")?;
     }
-    writeln!(code, "//end of {}px module\n}}\n", size)?;
+    writeln!(code, "//end of {size}px-{icon_set} module\n}}\n")?;
     Ok(())
 }
 
 fn gen_code(
     target_file: &Path,
-    icons: Vec<(u32, HashMap<String, Vec<String>>)>,
+    icons: Vec<(u32, IconSet, HashMap<String, Vec<String>>)>,
 ) -> anyhow::Result<()> {
     println!("generating code...");
 
@@ -228,8 +243,8 @@ fn gen_code(
 \n\n",
     );
 
-    for (size, these_icons) in icons {
-        gen_module(&mut code, size, &these_icons)?;
+    for (size, icon_set, these_icons) in icons {
+        gen_module(&mut code, size, icon_set, &these_icons)?;
     }
 
     if !target_file
@@ -249,36 +264,38 @@ fn gen_code(
 }
 
 pub fn main() {
-    let sizes = vec![12, 16, 18, 24, 32, 48, 96, 144];
+    const SIZES: &[u32] = &[12, 16, 18, 24, 32, 48, 96, 144];
 
     // panic!("{:#?}", get_categories());
 
-    let svgs: Vec<_> = WalkDir::new(ICONS_DIR) // WalkDir for potential future folders
-        .max_depth(2)
-        .into_iter()
-        .filter_map(|f| f.ok())
-        .filter(|f| {
-            f.path()
-                .extension()
-                .map(|ext| ext.to_ascii_lowercase() == "svg")
-                .unwrap_or(false)
-        })
-        .collect();
-
     let mut maps = vec![];
 
-    for size in sizes {
-        let icons = render_icons(
-            &svgs,
-            &get_categories().unwrap(),
-            size,
-            PathBuf::from(TARGET_DIR)
-                .join(format!("{}px", size))
-                .as_path(),
-        )
-        .expect("Couldn't render 24px icons");
+    for icon_set in &[IconSet::Regular, IconSet::Solid] {
+        let svgs: Vec<_> = WalkDir::new(PathBuf::from(ICONS_DIR).join(icon_set.to_string())) // WalkDir for potential future folders
+            .max_depth(1)
+            .into_iter()
+            .filter_map(|f| f.ok())
+            .filter(|f| {
+                f.path()
+                    .extension()
+                    .map(|ext| ext.eq_ignore_ascii_case("svg"))
+                    .unwrap_or(false)
+            })
+            .collect();
 
-        maps.push((size, icons));
+        for size in SIZES {
+            let icons = render_icons(
+                &svgs,
+                &get_categories().unwrap(),
+                *size,
+                PathBuf::from(TARGET_DIR)
+                    .join(format!("{size}px-{icon_set}"))
+                    .as_path(),
+            )
+            .expect("Couldn't render 24px icons");
+
+            maps.push((*size, *icon_set, icons));
+        }
     }
 
     gen_code(&PathBuf::from(ICON_CODEGEN_TARGET_FILE), maps).unwrap();

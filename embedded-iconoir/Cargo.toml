@@ -16,25 +16,50 @@ all-features = true
 
 [[test]]
 name = "render_test"
-required-features = [ "all-resolutions" ]
+required-features = ["all-resolutions"]
 
 [[bench]]
 name = "bench_icons"
-required-features = [ "all-resolutions" ]
+required-features = ["all-resolutions"]
 harness = false
 
 [features]
-12px = []
-16px = []
-18px = []
-24px = []
-32px = []
-48px = []
-96px = []
-144px = []
+12px-regular = []
+16px-regular = []
+18px-regular = []
+24px-regular = []
+32px-regular = []
+48px-regular = []
+96px-regular = []
+144px-regular = []
+12px-solid = []
+16px-solid = []
+18px-solid = []
+24px-solid = []
+32px-solid = []
+48px-solid = []
+96px-solid = []
+144px-solid = []
 
-default = ["24px"]
-all-resolutions = ["12px", "16px", "18px", "24px", "32px", "48px", "96px", "144px"]
+default = ["24px-regular"]
+all-resolutions = [
+    "12px-regular",
+    "16px-regular",
+    "18px-regular",
+    "24px-regular",
+    "32px-regular",
+    "48px-regular",
+    "96px-regular",
+    "144px-regular",
+    "12px-solid",
+    "16px-solid",
+    "18px-solid",
+    "24px-solid",
+    "32px-solid",
+    "48px-solid",
+    "96px-solid",
+    "144px-solid",
+]
 
 [dependencies]
 bit_field = "0.10"
@@ -45,4 +70,3 @@ static_assertions = "1.1"
 [dev-dependencies]
 anyhow = "1.0"
 criterion = "0.4"
-

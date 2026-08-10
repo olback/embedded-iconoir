@@ -43,24 +43,24 @@ macro_rules! test_render_icons_premade {
             activities::Archery,
             emojis::EmojiBlinkRight,
             cloud::CloudDesync,
-            three_d_editor::ThreedEllipse,
+            three_d_editor::EllipseThreed,
             actions::Restart,
             animals::Fish,
             animations::Keyframes,
             database::DatabaseSettings,
             design_tools::BorderTr,
-            devices::SaveFloppyDisk,
+            devices::FloppyDisk,
         );
     };
 }
 
-test_render_icons_premade!(test_12px, icons::size12px);
-test_render_icons_premade!(test_16px, icons::size16px);
-test_render_icons_premade!(test_18px, icons::size18px);
-test_render_icons_premade!(test_24px, icons::size24px);
-test_render_icons_premade!(test_32px, icons::size32px);
-test_render_icons_premade!(test_48px, icons::size48px);
+test_render_icons_premade!(test_12px, icons::size12px_regular);
+test_render_icons_premade!(test_16px, icons::size16px_regular);
+test_render_icons_premade!(test_18px, icons::size18px_regular);
+test_render_icons_premade!(test_24px, icons::size24px_regular);
+test_render_icons_premade!(test_32px, icons::size32px_regular);
+test_render_icons_premade!(test_48px, icons::size48px_regular);
 
 // doesn't work as MockDisplay as a hard-coded size of 64px for now
-// test_render_icons_premade!(test_96px, icons::size96px);
-// test_render_icons_premade!(test_144px, icons::size144px);
+// test_render_icons_premade!(test_96px, icons::size96px_regular);
+// test_render_icons_premade!(test_144px, icons::size144px_regular);
