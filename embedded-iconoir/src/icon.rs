@@ -57,9 +57,9 @@ make_icon!(SomeIcon, 24, "regular", "Animals", "fish");
 /// # use embedded_iconoir::Icon;
 /// # use embedded_iconoir::prelude::*;
 /// // using constructors on icons (recommended)
-/// let icon = icons::size24px_regular::actions::Download::new(BinaryColor::On);
+/// let icon = icons::size24px::regular::actions::Download::new(BinaryColor::On);
 /// // using types
-/// let icon: Icon<_, icons::size24px_regular::actions::Download> = Icon::new(BinaryColor::On);
+/// let icon: Icon<_, icons::size24px::regular::actions::Download> = Icon::new(BinaryColor::On);
 /// ```
 /// Both result in the same icon (`Icon<COLOR, ICON>`). Use whichever you prefer.
 ///
@@ -77,7 +77,7 @@ make_icon!(SomeIcon, 24, "regular", "Animals", "fish");
 /// use embedded_iconoir::prelude::*;
 ///
 /// // Create an icon
-/// let icon = icons::size24px_regular::actions::Download::new(BinaryColor::On);
+/// let icon = icons::size24px::regular::actions::Download::new(BinaryColor::On);
 ///
 /// // Wrap it in an embedded_graphics image
 /// let image = Image::new(&icon, Point::zero());

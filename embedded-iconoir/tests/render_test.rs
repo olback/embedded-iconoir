@@ -17,12 +17,12 @@ macro_rules! test_render_icon {
 }
 
 macro_rules! test_render_icons {
-    ( $name:ident, $res:ident::$module:ident, $($cat:ident::$icon:ident),*$(,)? ) => {
+    ( $name:ident, $res:ident::$module:ident::$icon_set:ident, $($cat:ident::$icon:ident),*$(,)? ) => {
         #[test]
         fn $name() -> anyhow::Result<()> {
             $(
-                println!("testing icon {}...", stringify!($res::$module::$cat::$icon));
-                test_render_icon!($res::$module::$cat::$icon)?;
+                println!("testing icon {}...", stringify!($res::$module::$icon_set::$cat::$icon));
+                test_render_icon!($res::$module::$icon_set::$cat::$icon)?;
             )*
             Ok(())
         }
@@ -36,10 +36,10 @@ fn temp() {
 }
 
 macro_rules! test_render_icons_premade {
-    ($name:ident, $res:ident::$module:ident) => {
+    ($name:ident, $res:ident::$module:ident::$icon_set:ident) => {
         test_render_icons!(
             $name,
-            $res::$module,
+            $res::$module::$icon_set,
             activities::Archery,
             emojis::EmojiBlinkRight,
             cloud::CloudDesync,
@@ -54,13 +54,13 @@ macro_rules! test_render_icons_premade {
     };
 }
 
-test_render_icons_premade!(test_12px, icons::size12px_regular);
-test_render_icons_premade!(test_16px, icons::size16px_regular);
-test_render_icons_premade!(test_18px, icons::size18px_regular);
-test_render_icons_premade!(test_24px, icons::size24px_regular);
-test_render_icons_premade!(test_32px, icons::size32px_regular);
-test_render_icons_premade!(test_48px, icons::size48px_regular);
+test_render_icons_premade!(test_12px, icons::size12px::regular);
+test_render_icons_premade!(test_16px, icons::size16px::regular);
+test_render_icons_premade!(test_18px, icons::size18px::regular);
+test_render_icons_premade!(test_24px, icons::size24px::regular);
+test_render_icons_premade!(test_32px, icons::size32px::regular);
+test_render_icons_premade!(test_48px, icons::size48px::regular);
 
 // doesn't work as MockDisplay as a hard-coded size of 64px for now
-// test_render_icons_premade!(test_96px, icons::size96px_regular);
-// test_render_icons_premade!(test_144px, icons::size144px_regular);
+// test_render_icons_premade!(test_96px, icons::size96px::regular);
+// test_render_icons_premade!(test_144px, icons::size144px::regular);

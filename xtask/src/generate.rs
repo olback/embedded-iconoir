@@ -1,5 +1,5 @@
 use resvg::tiny_skia::{Pixmap, Transform};
-use std::collections::HashMap;
+use std::collections::BTreeMap as MapType;
 use std::fs;
 use usvg::{FitTo, Tree};
 
@@ -18,10 +18,18 @@ const EXTENSION: &str = "bits";
 
 const ICON_CODEGEN_TARGET_FILE: &str = "./embedded-iconoir/src/icons.gen.rs";
 
-#[derive(Debug, Clone, Copy)]
+type Icons = MapType<u32, MapType<IconSet, MapType<String, Vec<String>>>>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum IconSet {
     Regular,
     Solid,
+}
+
+impl IconSet {
+    fn feature_name(&self, size: u32) -> String {
+        format!("{size}px-{self}")
+    }
 }
 
 impl core::fmt::Display for IconSet {
@@ -87,12 +95,12 @@ fn panic_render_debug(icon: &BitVec, size: u32) -> ! {
     panic!("{}", out);
 }
 
-fn get_categories() -> anyhow::Result<HashMap<String, String>> {
+fn get_categories() -> anyhow::Result<MapType<String, String>> {
     let regex =
         Regex::new("\"(?P<icon>[^\"]+)\",\"(?P<category>[^\"]+)\"(?:,\"(?P<tags>[^\"]+)\",?)?")
             .unwrap();
 
-    let mut map = HashMap::new();
+    let mut map = MapType::new();
     let text = fs::read_to_string(CATEGORIES_FILE_PATH)?;
 
     for icon_meta in regex.captures_iter(&text) {
@@ -107,13 +115,13 @@ fn get_categories() -> anyhow::Result<HashMap<String, String>> {
 
 fn render_icons(
     files: &[DirEntry],
-    categories: &HashMap<String, String>,
+    categories: &MapType<String, String>,
     size: u32,
     target_dir: &Path,
-) -> anyhow::Result<HashMap<String, Vec<String>>> {
+) -> anyhow::Result<MapType<String, Vec<String>>> {
     // input: icon -> categories, output: categories -> icons (as written)
     fs::create_dir_all(target_dir)?;
-    let mut out_map: HashMap<String, Vec<String>> = HashMap::new();
+    let mut out_map: MapType<String, Vec<String>> = MapType::new();
 
     for file in files {
         assert!(
@@ -180,8 +188,7 @@ fn denumber(s: &str) -> String {
 fn gen_module(
     code: &mut String,
     size: u32,
-    icon_set: IconSet,
-    icons: &HashMap<String, Vec<String>>,
+    icons: &MapType<IconSet, MapType<String, Vec<String>>>,
 ) -> anyhow::Result<()> {
     println!(
         "Generating module for {} icon categories of size {}px",
@@ -198,39 +205,59 @@ fn gen_module(
         ]);
      */
 
-    writeln!(code, "#[cfg(feature = \"{size}px-{icon_set}\")]")?;
+    assert!(
+        !icons.is_empty(),
+        "BUG: Cannot generate module for empty icon set"
+    );
+
     writeln!(
         code,
-        "pub mod size{size}px_{icon_set} {{ \nuse super::*; \n"
+        "#[cfg(any({}))]",
+        icons
+            .keys()
+            .map(|icon_set| format!("feature = \"{}\"", icon_set.feature_name(size)))
+            .collect::<Vec<_>>()
+            .join(", ")
     )?;
-    for (cat, icon_list) in icons {
-        println!(
-            "{size}px-{icon_set}: making category {cat} for {} icons...",
-            icon_list.len()
-        );
+
+    writeln!(code, "pub mod size{size}px {{\n")?;
+
+    for (icon_set, icons) in icons {
         writeln!(
             code,
-            "make_icon_category!({}, {size}, \"{icon_set}\", \"{cat}\", [",
-            denumber(cat).to_snake_case(),
+            "#[cfg(feature = \"{}\")]",
+            icon_set.feature_name(size)
         )?;
-        for icon_name in icon_list {
+        writeln!(code, "pub mod {icon_set} {{\n\nuse super::super::*;\n")?;
+        for (cat, icon_list) in icons {
+            println!(
+                "{size}px-{icon_set}: making category {cat} for {} icons...",
+                icon_list.len()
+            );
             writeln!(
                 code,
-                "      ({}, \"{}\"),",
-                denumber(icon_name).to_upper_camel_case(),
-                icon_name.replace(".bits", "")
+                "make_icon_category!({}, {size}, \"{icon_set}\", \"{cat}\", [",
+                denumber(cat).to_snake_case(),
             )?;
+            for icon_name in icon_list {
+                writeln!(
+                    code,
+                    "      ({}, \"{}\"),",
+                    denumber(icon_name).to_upper_camel_case(),
+                    icon_name.replace(".bits", "")
+                )?;
+            }
+            writeln!(code, "]);")?;
         }
-        writeln!(code, "]);")?;
+        writeln!(code, "}} // end of {icon_set} module")?;
     }
-    writeln!(code, "//end of {size}px-{icon_set} module\n}}\n")?;
+
+    writeln!(code, "}} // end of size{size}px module\n\n")?;
+
     Ok(())
 }
 
-fn gen_code(
-    target_file: &Path,
-    icons: Vec<(u32, IconSet, HashMap<String, Vec<String>>)>,
-) -> anyhow::Result<()> {
+fn gen_code(target_file: &Path, icons: Icons) -> anyhow::Result<()> {
     println!("generating code...");
 
     let mut code = String::new();
@@ -243,8 +270,8 @@ fn gen_code(
 \n\n",
     );
 
-    for (size, icon_set, these_icons) in icons {
-        gen_module(&mut code, size, icon_set, &these_icons)?;
+    for (size, sets) in icons {
+        gen_module(&mut code, size, &sets)?;
     }
 
     if !target_file
@@ -265,12 +292,13 @@ fn gen_code(
 
 pub fn main() {
     const SIZES: &[u32] = &[12, 16, 18, 24, 32, 48, 96, 144];
+    const SETS: &[IconSet] = &[IconSet::Regular, IconSet::Solid];
+    let categories = get_categories().unwrap();
 
-    // panic!("{:#?}", get_categories());
+    // MapType::<size, MapType<icon set, MapType<category, Vec<icon_name>>>>
+    let mut icons = Icons::new();
 
-    let mut maps = vec![];
-
-    for icon_set in &[IconSet::Regular, IconSet::Solid] {
+    for icon_set in SETS {
         let svgs: Vec<_> = WalkDir::new(PathBuf::from(ICONS_DIR).join(icon_set.to_string())) // WalkDir for potential future folders
             .max_depth(1)
             .into_iter()
@@ -284,25 +312,23 @@ pub fn main() {
             .collect();
 
         for size in SIZES {
-            let icons = render_icons(
+            let rendered_icons = render_icons(
                 &svgs,
-                &get_categories().unwrap(),
+                &categories,
                 *size,
                 PathBuf::from(TARGET_DIR)
                     .join(format!("{size}px-{icon_set}"))
                     .as_path(),
             )
-            .expect("Couldn't render 24px icons");
+            .expect(&format!("Couldn't render {size}px-{icon_set} icons"));
 
-            maps.push((*size, *icon_set, icons));
+            *icons
+                .entry(*size)
+                .or_insert_with(|| MapType::new())
+                .entry(*icon_set)
+                .or_insert_with(MapType::new) = rendered_icons;
         }
     }
 
-    gen_code(&PathBuf::from(ICON_CODEGEN_TARGET_FILE), maps).unwrap();
-
-    // panic!("svgs: {:#?}", svgs);
-
-    // let icon = icon_to_bits(PathBuf::from("./iconoir/icons/3d-select-face.svg"), size).unwrap();
-
-    // panic_render_debug(&icon, size);
+    gen_code(&PathBuf::from(ICON_CODEGEN_TARGET_FILE), icons).unwrap();
 }

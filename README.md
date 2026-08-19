@@ -31,11 +31,9 @@ that that will significantly increase your compile time.
 
 ### Using the icons
 
-The icons are structured into modules by **size** and then **category**.
-So, `icons::sizeXXpx::CATEGORY::CamelCaseIconName` is how you can select a specific
-icon in a specific resolution.
-If you're only using one resolution, it's a good idea to import `embedded_iconoir::icons::sizeXXpx::*` so
-that you have direct access to all categories.
+The icons are structured into modules by **size**, **category** and **set**.
+So, `icons::sizeXXpx::SET::CATEGORY::CamelCaseIconName` is how you can select a specific icon in a specific resolution.
+If you're only using one resolution, it's a good idea to import `embedded_iconoir::icons::sizeXXpx::SET::*` so that you have direct access to all categories.
 
 Here's an example:
 ```rust
@@ -45,10 +43,10 @@ fn main() -> anyhow::Result<()> {
     let color = Rgb888::CSS_CYAN;
 
     // Color is specified during icon creation
-    let mut icon_tiny = icons::size12px_regular::development::CodeBracketsSquare::new(color);
-    let mut icon_normal = icons::size24px_regular::development::CodeBracketsSquare::new(color);
-    let mut icon_large = icons::size48px_regular::development::CodeBracketsSquare::new(color);
-    let mut icon_huge = icons::size144px_regular::development::CodeBracketsSquare::new(color);
+    let mut icon_tiny = icons::size12px::regular::development::CodeBracketsSquare::new(color);
+    let mut icon_normal = icons::size24px::regular::development::CodeBracketsSquare::new(color);
+    let mut icon_large = icons::size48px::regular::development::CodeBracketsSquare::new(color);
+    let mut icon_huge = icons::size144px::regular::development::CodeBracketsSquare::new(color);
 
     // Icons must be wrapped into images to draw them properly
     let image_tiny = Image::new(&icon_tiny, Point::new(10, 10));

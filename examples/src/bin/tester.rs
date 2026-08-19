@@ -7,8 +7,11 @@ use embedded_graphics_simulator::{
     OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
 use embedded_iconoir::prelude::IconoirNewIcon;
-use embedded_iconoir::size18px_regular::{actions, activities, buildings, cloud};
-use embedded_iconoir::{size12px_regular, size18px_regular, size24px_regular, size32px_regular};
+use embedded_iconoir::size18px::regular::{actions, activities, buildings, cloud};
+use embedded_iconoir::{
+    size12px::regular as regular12, size18px::regular as regular18, size24px::regular as regular24,
+    size32px::regular as regular32,
+};
 
 type Color = Rgb888;
 
@@ -73,7 +76,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size18px_regular::development::ElectronicsChip::new(Rgb888::CSS_BEIGE),
+        &regular18::development::ElectronicsChip::new(Rgb888::CSS_BEIGE),
         3,
         2,
         20,
@@ -82,7 +85,7 @@ fn main() {
 
     draw_icon(
         &mut display,
-        &size32px_regular::buildings::Church::new(Rgb888::CSS_CORAL),
+        &regular32::buildings::Church::new(Rgb888::CSS_CORAL),
         3,
         2,
         40,
@@ -90,7 +93,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::actions::Xmark::new(Rgb888::CSS_DARK_SLATE_GRAY),
+        &regular32::actions::Xmark::new(Rgb888::CSS_DARK_SLATE_GRAY),
         1,
         2,
         40,
@@ -98,7 +101,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::activities::Archery::new(Rgb888::CSS_ALICE_BLUE),
+        &regular32::activities::Archery::new(Rgb888::CSS_ALICE_BLUE),
         2,
         2,
         40,
@@ -106,7 +109,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::buildings::Church::new(Rgb888::CSS_CORAL),
+        &regular32::buildings::Church::new(Rgb888::CSS_CORAL),
         3,
         2,
         40,
@@ -114,7 +117,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::buildings::ChurchSide::new(Rgb888::CSS_CHOCOLATE),
+        &regular32::buildings::ChurchSide::new(Rgb888::CSS_CHOCOLATE),
         1,
         3,
         40,
@@ -122,7 +125,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::cloud::CloudSync::new(Rgb888::CSS_CYAN),
+        &regular32::cloud::CloudSync::new(Rgb888::CSS_CYAN),
         2,
         3,
         40,
@@ -130,7 +133,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::development::ElectronicsChip::new(Rgb888::CSS_CRIMSON),
+        &regular32::development::ElectronicsChip::new(Rgb888::CSS_CRIMSON),
         3,
         3,
         40,
@@ -139,7 +142,7 @@ fn main() {
 
     draw_icon(
         &mut display,
-        &size24px_regular::activities::Bonfire::new(Rgb888::CSS_FUCHSIA),
+        &regular24::activities::Bonfire::new(Rgb888::CSS_FUCHSIA),
         8,
         2,
         30,
@@ -150,7 +153,7 @@ fn main() {
 
     draw_icon(
         &mut display,
-        &size12px_regular::buildings::Church::new(Rgb888::CSS_CORAL),
+        &regular12::buildings::Church::new(Rgb888::CSS_CORAL),
         7,
         2,
         12,
@@ -158,7 +161,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size12px_regular::actions::Xmark::new(Rgb888::CSS_DARK_SLATE_GRAY),
+        &regular12::actions::Xmark::new(Rgb888::CSS_DARK_SLATE_GRAY),
         8,
         2,
         12,
@@ -166,7 +169,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size12px_regular::activities::Archery::new(Rgb888::CSS_ALICE_BLUE),
+        &regular12::activities::Archery::new(Rgb888::CSS_ALICE_BLUE),
         9,
         2,
         12,
@@ -174,7 +177,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size12px_regular::buildings::Church::new(Rgb888::CSS_CORAL),
+        &regular12::buildings::Church::new(Rgb888::CSS_CORAL),
         10,
         2,
         12,
@@ -182,7 +185,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size12px_regular::buildings::ChurchSide::new(Rgb888::CSS_CHOCOLATE),
+        &regular12::buildings::ChurchSide::new(Rgb888::CSS_CHOCOLATE),
         8,
         3,
         12,
@@ -190,7 +193,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size12px_regular::cloud::CloudSync::new(Rgb888::CSS_CYAN),
+        &regular12::cloud::CloudSync::new(Rgb888::CSS_CYAN),
         9,
         3,
         12,
@@ -198,7 +201,7 @@ fn main() {
     );
     draw_icon(
         &mut display,
-        &size32px_regular::development::ElectronicsChip::new(Rgb888::CSS_CRIMSON),
+        &regular12::development::ElectronicsChip::new(Rgb888::CSS_CRIMSON),
         10,
         3,
         12,
